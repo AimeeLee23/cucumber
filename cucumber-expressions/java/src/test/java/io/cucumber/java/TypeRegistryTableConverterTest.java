@@ -4,6 +4,8 @@ import io.cucumber.cucumberexpressions.Function;
 import io.cucumber.cucumberexpressions.ParameterType;
 import io.cucumber.cucumberexpressions.SingleTransformer;
 import io.cucumber.datatable.DataTable;
+import io.cucumber.datatable.DataTableType;
+import io.cucumber.datatable.RawTableTransformer;
 import io.cucumber.datatable.TableConverter;
 import io.cucumber.datatable.TableRowTransformer;
 import io.cucumber.cucumberexpressions.TypeReference;
@@ -24,6 +26,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Locale.ENGLISH;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 public class TypeRegistryTableConverterTest {
 
@@ -134,6 +137,27 @@ public class TypeRegistryTableConverterTest {
         assertEquals(singletonList(new Animal("Muffalo", 15)), converter.convert(table, new TypeReference<List<Animal>>() {
         }.getType(), false));
     }
+
+
+    @Test
+    public void when_converting_to_data_table_table_type_takes_precedence_over_item_type() {
+        final DataTable expected = new DataTable(Collections.<List<String>>emptyList());
+
+        registry.defineDataTableType(new DataTableType<>("table", DataTable.class, new RawTableTransformer<DataTable>() {
+            @Override
+            public DataTable transform(List<List<String>> raw) {
+                return expected;
+            }
+        }));
+
+        DataTable table = new DataTable(asList(
+                asList("name", "life expectancy"),
+                asList("Muffalo", "15")
+        ));
+
+        assertSame(expected, converter.convert(table, DataTable.class, false));
+    }
+
 
 
     @Test

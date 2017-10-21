@@ -40,13 +40,13 @@ public final class TypeRegistryTableConverter implements io.cucumber.datatable.T
             dataTable = dataTable.transpose();
         }
 
-        if (type.equals(DataTable.class)) {
-            return (T) dataTable;
-        }
-
         DataTableType<T> tableType = registry.lookupTableTypeByType(type);
         if (tableType != null) {
             return tableType.transform(dataTable.cells());
+        }
+
+        if (type.equals(DataTable.class)) {
+            return (T) dataTable;
         }
 
         Type mapKeyType = mapKeyType(type);
