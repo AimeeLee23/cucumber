@@ -20,7 +20,7 @@ public final class TypeRegistry {
         dataTableTypeRegistry = new DataTableTypeRegistry();
     }
 
-    ParameterTypeRegistry parameterTypeRegistry() {
+    public ParameterTypeRegistry parameterTypeRegistry() {
         return parameterTypeRegistry;
     }
 
