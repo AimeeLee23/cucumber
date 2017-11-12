@@ -51,11 +51,11 @@ public final class DataTableType<T> implements Comparable<DataTableType<?>> {
         return type;
     }
 
-    public static <T> DataTableType<T> tableAs(String name, Class<T> type, final TableTransformer<T> transformer) {
+    public static <T> DataTableType<T> tableAs(String name, Type type, final TableTransformer<T> transformer) {
         return new DataTableType<>(name, type, transformer);
     }
 
-    public static <T> DataTableType<List<T>> tableOf(String name, Class<T> type, final TableRowTransformer<T> transformer) {
+    public static <T> DataTableType<List<T>> tableOf(String name, Type type, final TableRowTransformer<T> transformer) {
         return new DataTableType<>(name, aListOf(type), new TableTransformer<List<T>>() {
             @Override
             public List<T> transform(DataTable table) {

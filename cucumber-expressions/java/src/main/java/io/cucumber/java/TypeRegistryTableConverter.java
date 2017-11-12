@@ -27,14 +27,12 @@ public final class TypeRegistryTableConverter implements io.cucumber.datatable.T
 
     public TypeRegistryTableConverter(TypeRegistry registry) {
         this.registry = registry;
-
     }
 
     @Override
     public <T> T convert(DataTable dataTable, Type type, boolean transposed) {
         if (dataTable == null) throw new CucumberExpressionException("dataTable may not be null");
         if (type == null) throw new CucumberExpressionException("type may not be null");
-
 
         if (transposed) {
             dataTable = dataTable.transpose();
@@ -60,31 +58,24 @@ public final class TypeRegistryTableConverter implements io.cucumber.datatable.T
             throw new CucumberExpressionException(String.format("Can't convert DataTable to %1$s", type));
         }
 
+        Type mapKeyItemType = mapKeyType(itemType);
+        if (mapKeyItemType != null) {
+            Type mapValueType = mapValueType(type);
+            return (T) toMaps(dataTable, mapKeyItemType, mapValueType);
+        } else if (Map.class.equals(itemType)) {
+            // Non-generic map
+            return (T) toMaps(dataTable, String.class, String.class);
+        }
+
         Type listItemType = listItemType(itemType);
         if (listItemType != null) {
             return (T) toLists(dataTable, listItemType);
+        } else if (List.class.equals(itemType)) {
+            // Non-generic list
+            return (T) toLists(dataTable, String.class);
         }
 
-        if (itemType instanceof Class) {
-            if (Map.class.equals(itemType)) {
-                // Non-generic map
-                return (T) toMaps(dataTable, String.class, String.class);
-            } else if (List.class.equals(itemType)) {
-                // Non-generic list
-                return (T) toLists(dataTable, String.class);
-            } else {
-                return (T) toList(dataTable, itemType);
-            }
-        }
-
-        Type mapKeyItemType = mapKeyType(itemType);
-        if (mapKeyItemType != null) {
-
-            Type mapValueType = mapValueType(type);
-            return (T) toMaps(dataTable, mapKeyItemType, mapValueType);
-        }
-
-        throw new CucumberExpressionException(String.format("Can't convert DataTable to %1$s", type));
+        return (T) toList(dataTable, itemType);
     }
 
     @Override
@@ -204,11 +195,9 @@ public final class TypeRegistryTableConverter implements io.cucumber.datatable.T
         return unmodifiableList(result);
     }
 
-
     @Override
     public DataTable toTable(List<?> objects, String... columnNames) {
         throw new NotImplementedException();
     }
-
 
 }

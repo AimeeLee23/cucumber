@@ -14,6 +14,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -36,11 +37,6 @@ public class TypeRegistryTableConverterTest {
 
     private final TypeRegistry registry = new TypeRegistry(ENGLISH);
     private final TableConverter converter = new TypeRegistryTableConverter(registry);
-
-
-    //    <T> T convert(DataTable dataTable, Type type, boolean transposed);
-//
-//    <T> List<T> asList(DataTable dataTable, Type itemType);
 
     @Test
     public void converts_empty_table_to_empty_list() {
@@ -159,12 +155,12 @@ public class TypeRegistryTableConverterTest {
         assertSame(expected, converter.convert(table, DataTable.class, false));
     }
 
-
-
     @Test
-    @Ignore // Needs a proper bean mapper.
     public void converts_table_to_list_of_generic_item_type() {
-        registry.defineDataTableType(tableOf("muffalo-barn", Barn.class, new TableRowTransformer<Barn>() {
+        Type barnAnimalType = new TypeReference<Barn<Animal>>() {}.getType();
+        Type listOfbarnAnimalType = new TypeReference<List<Barn<Animal>>>() {}.getType();
+
+        registry.defineDataTableType(tableOf("muffalo-barn", barnAnimalType, new TableRowTransformer<Barn>() {
             @Override
             public Barn transform(Map<String, String> row) {
                 return new Barn<>(new Animal("Muffalo", 15));
@@ -176,13 +172,9 @@ public class TypeRegistryTableConverterTest {
                 asList("Muffalo", "15")
         ));
 
-        assertEquals(singletonList(new Barn<>(new Animal("Muffalo", 15))), converter.toList(table, Barn.class));
-        assertEquals(singletonList(new Barn<>(new Animal("Muffalo", 15))), converter.convert(table, new TypeReference<List<Barn<Animal>>>() {
-        }.getType(), false));
+        assertEquals(singletonList(new Barn<>(new Animal("Muffalo", 15))), converter.toList(table, barnAnimalType));
+        assertEquals(singletonList(new Barn<>(new Animal("Muffalo", 15))), converter.convert(table, listOfbarnAnimalType, false));
     }
-
-
-//    <T> List<List<T>> asLists(DataTable dataTable, Type itemType);
 
     @Test
     public void converts_empty_table_to_empty_lists() {
@@ -218,8 +210,7 @@ public class TypeRegistryTableConverterTest {
                 singletonList(7));
 
         assertEquals(expected, converter.toLists(table, Integer.class));
-        assertEquals(expected, converter.convert(table, new TypeReference<List<List<Integer>>>() {
-        }.getType(), false));
+        assertEquals(expected, converter.convert(table, new TypeReference<List<List<Integer>>>() {}.getType(), false));
     }
 
     @Test
@@ -235,8 +226,7 @@ public class TypeRegistryTableConverterTest {
                 asList(6, 7));
 
         assertEquals(expected, converter.toLists(table, Integer.class));
-        assertEquals(expected, converter.convert(table, new TypeReference<List<List<Integer>>>() {
-        }.getType(), false));
+        assertEquals(expected, converter.convert(table, new TypeReference<List<List<Integer>>>() {}.getType(), false));
     }
 
     @Test
@@ -260,8 +250,7 @@ public class TypeRegistryTableConverterTest {
 
 
         expectedException.expectMessage(String.format("Can't convert DataTable to List<List<%s>>", Animal.class));
-        converter.convert(table, new TypeReference<List<List<Animal>>>() {
-        }.getType(), false);
+        converter.convert(table, new TypeReference<List<List<Animal>>>() {}.getType(), false);
     }
 
 
