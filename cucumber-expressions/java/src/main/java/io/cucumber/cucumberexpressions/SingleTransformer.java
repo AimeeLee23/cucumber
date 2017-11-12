@@ -1,5 +1,7 @@
 package io.cucumber.cucumberexpressions;
 
+import java.util.Arrays;
+
 public class SingleTransformer<T> implements ParameterTransformer<T> {
     private final Function<String, T> function;
 
@@ -19,6 +21,10 @@ public class SingleTransformer<T> implements ParameterTransformer<T> {
             }
         }
         if (arg == null) return null;
-        return function.apply(arg);
+        try {
+            return function.apply(arg);
+        } catch (Throwable e) {
+            throw new CucumberExpressionException(String.format("Single transformer could not transform \"%s\"", Arrays.toString(groupValues)), e);
+        }
     }
 }
